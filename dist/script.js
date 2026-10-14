@@ -486,6 +486,42 @@ function setupBackToTop() {
   button.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 }
 
+function setupScrollReveal() {
+  const targets = [
+    ...document.querySelectorAll(".section:not(.hero) > :not(.hero-flower)"),
+    ...document.querySelectorAll(
+      ".family-columns > div, .event-schedule .event-card, .countdown > div, .gallery-item"
+    )
+  ].filter((element) => !element.classList.contains("gift-trigger"));
+
+  if (!targets.length) return;
+
+  const groupedTargets = new Map();
+  targets.forEach((element) => {
+    const group = element.parentElement;
+    const index = groupedTargets.get(group) || 0;
+    groupedTargets.set(group, index + 1);
+    element.classList.add("reveal-item");
+    element.classList.add(index % 3 === 1 ? "reveal-from-left" : index % 3 === 2 ? "reveal-from-right" : "reveal-from-bottom");
+    element.style.setProperty("--reveal-delay", `${Math.min(index, 5) * 85}ms`);
+  });
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+    targets.forEach((element) => element.classList.add("is-visible"));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries, revealObserver) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("is-visible");
+      revealObserver.unobserve(entry.target);
+    });
+  }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" });
+
+  targets.forEach((element) => observer.observe(element));
+}
+
 document.body.classList.add("cover-locked");
 setupImages();
 setupCover();
@@ -498,3 +534,4 @@ setupBankCopy();
 setupGift();
 setupFallingHearts();
 setupBackToTop();
+setupScrollReveal();

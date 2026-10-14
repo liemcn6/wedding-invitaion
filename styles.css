@@ -2329,6 +2329,39 @@ body::after {
   }
 }
 
+/* Reveal each invitation block as it enters the viewport while scrolling. */
+.reveal-item {
+  opacity: 0;
+  transform: translate3d(0, 34px, 0);
+  transition:
+    opacity 680ms ease,
+    transform 780ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal-item.reveal-from-left {
+  transform: translate3d(-38px, 20px, 0);
+}
+
+.reveal-item.reveal-from-right {
+  transform: translate3d(38px, 20px, 0);
+}
+
+.reveal-item.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-item,
+  .reveal-item.reveal-from-left,
+  .reveal-item.reveal-from-right {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* Guestbook / RSVP card styled after the reference invitation. */
 .guestbook-section {
   padding-top: 42px;
