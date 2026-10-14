@@ -145,7 +145,12 @@ function setupCover() {
     opened = true;
     document.body.classList.remove("cover-locked");
     cover.classList.add("is-opening");
-    window.setTimeout(() => cover.classList.add("is-open"), 1250);
+    window.setTimeout(() => {
+      cover.classList.add("is-open");
+      window.setTimeout(() => {
+        document.dispatchEvent(new Event("wedding-cover-opened"));
+      }, 350);
+    }, 1250);
     tryStartMusic();
   };
 
@@ -303,7 +308,7 @@ async function setupGuestbook() {
     const wishMarkup = wishes.map(({ name, message }) => `
       <article class="wish-item">
         <p class="wish-message">&quot;${escapeHtml(message)}&quot;</p>
-        <p class="wish-author">— ${escapeHtml(name)}</p>
+        <p class="wish-author">${escapeHtml(name)}</p>
       </article>
     `).join("");
 
@@ -488,9 +493,11 @@ function setupBackToTop() {
 
 function setupScrollReveal() {
   const targets = [
-    ...document.querySelectorAll(".section:not(.hero) > :not(.hero-flower)"),
+    ...document.querySelectorAll(".hero > h1, .hero > .hero-date"),
+    ...document.querySelectorAll(".section > :not(.hero-flower)"),
     ...document.querySelectorAll(
-      ".family-columns > div, .event-schedule .event-card, .countdown > div, .gallery-item"
+      ".family-columns > div, .event-schedule .event-card, .countdown > div, .gallery-item, " +
+      ".couple-grid .person-role, .couple-grid .person-card h3, .couple-grid > .ampersand"
     )
   ].filter((element) => !element.classList.contains("gift-trigger"));
 
@@ -519,7 +526,12 @@ function setupScrollReveal() {
     });
   }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" });
 
-  targets.forEach((element) => observer.observe(element));
+  const observeTargets = () => targets.forEach((element) => observer.observe(element));
+  if (document.body.classList.contains("cover-locked")) {
+    document.addEventListener("wedding-cover-opened", observeTargets, { once: true });
+  } else {
+    observeTargets();
+  }
 }
 
 document.body.classList.add("cover-locked");
